@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WanderWhen — Discover where to travel</title>
+<meta name="description" content="Discover the best destinations based on when you want to travel. Handpicked recommendations matched to your month and trip style.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:        #0C0B09;
+  --bg-card:   #141310;
+  --text-pri:  #EDE8DE;
+  --text-sec:  #6E6E68;
+  --text-dim:  #353530;
+  --accent:    #3A7B78;
+  --accent-h:  #52A8A5;
+  --warm:      #C8943A;
+  --border:    #242420;
+  --border-l:  #1C1C18;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text-pri);
+  font-family:'DM Sans',system-ui,sans-serif;
+  font-weight:300;
+  line-height:1.6;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* Grain overlay */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  pointer-events:none;z-index:900;
+  opacity:0.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+.page{max-width:1180px;margin:0 auto;padding:0 44px;}
+@media(max-width:800px){.page{padding:0 24px;}}
+@media(max-width:480px){.page{padding:0 16px;}}
+
+/* Header */
+.site-header{padding:32px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:400;letter-spacing:0.04em;color:var(--text-pri);text-decoration:none;}
+.logo-when{color:var(--accent);}
+.header-domain{font-size:10px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;}
+
+/* Hero */
+.hero{padding:72px 0 0;}
+.hero-eyebrow{
+  font-size:9.5px;letter-spacing:0.22em;color:var(--accent);
+  text-transform:uppercase;font-weight:400;margin-bottom:22px;
+  display:flex;align-items:center;gap:12px;
+}
+.hero-eyebrow::before{content:'';display:block;width:28px;height:0.5px;background:var(--accent);opacity:0.5;}
+.hero-h1{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(34px,5vw,60px);
+  font-weight:400;line-height:1.12;letter-spacing:-0.02em;
+  color:var(--text-pri);max-width:640px;margin-bottom:22px;
+}
+.hero-h1 em{font-style:italic;color:var(--accent-h);}
+.hero-sub{font-size:13.5px;color:var(--text-sec);line-height:1.78;max-width:400px;font-weight:300;letter-spacing:0.01em;}
+
+/* Filters */
+.filters{padding:68px 0 36px;}
+.filter-block{margin-bottom:30px;}
+.filter-label{font-size:9px;letter-spacing:0.18em;color:var(--text-dim);text-transform:uppercase;font-weight:500;margin-bottom:14px;}
+.filter-label .opt{font-weight:300;text-transform:none;letter-spacing:0;font-size:9px;color:#222220;}
+
+.month-grid{display:grid;grid-template-columns:repeat(6,auto);gap:7px;justify-content:start;}
+@media(max-width:520px){
+  .month-grid{grid-template-columns:repeat(6,1fr);}
+  .month-grid .pill{padding:8px 2px;font-size:10px;letter-spacing:0;}
+}
+.exp-row{display:flex;flex-wrap:wrap;gap:7px;}
+
+/* Pills */
+.pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:7px 16px;border-radius:100px;
+  font-size:11.5px;font-weight:400;letter-spacing:0.02em;
+  border:0.5px solid var(--border-l);
+  color:var(--text-dim);background:transparent;
+  cursor:pointer;transition:all .16s;
+  white-space:nowrap;user-select:none;
+  font-family:'DM Sans',system-ui,sans-serif;line-height:1;
+}
+.pill:hover{border-color:#2E2E2A;color:var(--text-sec);}
+.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.pill.m-active{background:#0C2020;border-color:#2A4A46;color:var(--accent-h);font-weight:500;}
+.pill.e-active{background:#160E00;border-color:#3E2A08;color:var(--warm);}
+
+/* Separator */
+.sep{height:0.5px;background:var(--border-l);}
+
+/* Results header */
+.results-header{display:flex;align-items:baseline;justify-content:space-between;padding:28px 0 22px;}
+.results-title{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:21px;font-weight:400;letter-spacing:-0.01em;color:var(--text-pri);
+}
+.results-title em{font-style:italic;color:var(--accent-h);}
+.results-count{font-size:10px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;}
+
+/* Card grid */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;padding-bottom:80px;
+}
+@media(max-width:1000px){.card-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:700px){.card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}}
+@media(max-width:420px){.card-grid{grid-template-columns:minmax(0,1fr);}}
+
+/* Card */
+.card{
+  border-radius:10px;overflow:hidden;
+  background:var(--bg-card);
+  border:0.5px solid var(--border-l);
+  cursor:default;
+  transition:transform .26s cubic-bezier(.25,.46,.45,.94),
+             box-shadow .26s cubic-bezier(.25,.46,.45,.94),
+             border-color .26s;
+  animation:cardIn .3s cubic-bezier(.25,.46,.45,.94) both;
+}
+.card:hover{transform:translateY(-3px);box-shadow:0 18px 44px rgba(0,0,0,.5);border-color:var(--border);}
+.card:hover .card-img-inner,
+.card:hover .card-photo{transform:scale(1.055);}
+@keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+
+.card-img-wrap{height:148px;overflow:hidden;position:relative;}
+.card-img-inner{width:100%;height:100%;display:block;transition:transform .42s cubic-bezier(.25,.46,.45,.94);}
+.card-photo{width:100%;height:100%;display:block;object-fit:cover;transition:transform .42s cubic-bezier(.25,.46,.45,.94);}
+.card-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,11,9,0) 15%,rgba(12,11,9,.92) 100%);pointer-events:none;}
+.card-badge{
+  position:absolute;top:10px;left:10px;
+  font-size:8.5px;font-weight:500;letter-spacing:0.13em;text-transform:uppercase;
+  color:var(--accent-h);background:rgba(6,16,14,.85);
+  border:0.5px solid rgba(58,123,120,.25);padding:3px 9px;border-radius:100px;
+}
+
+.card-body{padding:14px 16px 18px;}
+.card-name{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:18px;font-weight:400;letter-spacing:-0.01em;
+  color:var(--text-pri);line-height:1.1;margin-bottom:4px;
+}
+.card-country{
+  font-size:9px;letter-spacing:0.13em;color:var(--text-dim);
+  text-transform:uppercase;font-weight:500;margin-bottom:10px;
+  display:flex;align-items:center;gap:5px;
+}
+.card-emoji{font-size:11px;}
+.card-desc{font-size:12px;color:var(--text-sec);line-height:1.68;font-weight:300;margin-bottom:14px;}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.ctag{
+  font-size:8.5px;padding:2.5px 8px;border-radius:100px;
+  border:0.5px solid var(--border-l);color:var(--text-dim);
+  letter-spacing:0.1em;text-transform:uppercase;font-weight:400;
+}
+
+/* Empty state */
+.empty-state{text-align:center;padding:80px 20px;grid-column:1/-1;}
+.empty-icon{font-size:28px;margin-bottom:18px;opacity:0.25;}
+.empty-msg{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:20px;font-weight:300;color:var(--text-sec);letter-spacing:-0.01em;
+}
+.empty-sub{font-size:12px;margin-top:10px;color:#2A2A26;}
+
+/* Footer */
+.site-footer{border-top:0.5px solid var(--border-l);padding:22px 0 12px;}
+.footer-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:11px;color:var(--text-dim);letter-spacing:0.02em;}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:11px;color:var(--text-dim);text-decoration:none;transition:color .14s;}
+.footer-links a:hover{color:var(--text-sec);}
+.footer-disclaimer{font-size:10px;color:#252522;letter-spacing:0.01em;line-height:1.68;max-width:600px;margin-top:12px;padding-bottom:32px;}
+
+/* SR only */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header" role="banner">
+  <a href="/" class="logo" aria-label="WanderWhen home">Wander<span class="logo-when">When</span></a>
+  <span class="header-domain" aria-hidden="true">wanderwhen.co</span>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="hero-heading">
+    <p class="hero-eyebrow" aria-hidden="true">Travel discovery</p>
+    <h1 class="hero-h1" id="hero-heading">Know when you want to travel?<br>We'll show you <em>where to go.</em></h1>
+    <p class="hero-sub">Handpicked destinations matched to your month and the kind of trip you want.</p>
+  </section>
+
+  <section class="filters" aria-label="Destination filters">
+    <div class="filter-block">
+      <p class="filter-label" id="month-label">Pick a month</p>
+      <div class="month-grid" role="group" aria-labelledby="month-label" id="month-grid"></div>
+    </div>
+    <div class="filter-block">
+      <p class="filter-label" id="exp-label">Filter by experience <span class="opt">— optional</span></p>
+      <div class="exp-row" role="group" aria-labelledby="exp-label" id="exp-grid"></div>
+    </div>
+  </section>
+
+  <div class="sep" role="separator"></div>
+
+  <section aria-label="Destination results">
+    <div class="results-header">
+      <h2 class="results-title" id="results-title" aria-live="polite" aria-atomic="true">Best destinations in <em>June</em></h2>
+      <span class="results-count" id="results-count" aria-live="polite" aria-atomic="true"></span>
+    </div>
+    <div class="card-grid" id="card-grid" role="list" aria-label="Destination cards"></div>
+  </section>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-row">
+    <span class="footer-copy">© 2026 WanderWhen</span>
+    <nav class="footer-links" aria-label="Footer links">
+      <a href="#">Privacy policy</a>
+      <a href="#">Terms</a>
+    </nav>
+  </div>
+  <p class="footer-disclaimer">Recommendations are based on general travel conditions and seasonal patterns. Results may vary by year and individual circumstances.</p>
+</footer>
+
+</div>
+<script>
+const DESTINATIONS = [{"id":"dest_argentina","slug":"argentina","name":"Argentina","country":"Argentina","emoji":"🇦🇷","region":"Americas","destinationType":"country"},{"id":"dest_australia","slug":"australia","name":"Australia","country":"Australia","emoji":"🇦🇺","region":"Oceania","destinationType":"country"},{"id":"dest_austria","slug":"austria","name":"Austria","country":"Austria","emoji":"🇦🇹","region":"Europe","destinationType":"country"},{"id":"dest_bali","slug":"bali","name":"Bali","country":"Indonesia","emoji":"🇮🇩","region":"Asia","destinationType":"island"},{"id":"dest_brazil","slug":"brazil","name":"Brazil","country":"Brazil","emoji":"🇧🇷","region":"Americas","destinationType":"country"},{"id":"dest_california","slug":"california","name":"California","country":"United States","emoji":"🇺🇸","region":"Americas","destinationType":"region"},{"id":"dest_cambodia","slug":"cambodia","name":"Cambodia","country":"Cambodia","emoji":"🇰🇭","region":"Asia","destinationType":"country"},{"id":"dest_canada","slug":"canada","name":"Canada","country":"Canada","emoji":"🇨🇦","region":"Americas","destinationType":"country"},{"id":"dest_chile","slug":"chile","name":"Chile","country":"Chile","emoji":"🇨🇱","region":"Americas","destinationType":"country"},{"id":"dest_colombia","slug":"colombia","name":"Colombia","country":"Colombia","emoji":"🇨🇴","region":"Americas","destinationType":"country"},{"id":"dest_costa-rica","slug":"costa-rica","name":"Costa Rica","country":"Costa Rica","emoji":"🇨🇷","region":"Americas","destinationType":"country"},{"id":"dest_croatia","slug":"croatia","name":"Croatia","country":"Croatia","emoji":"🇭🇷","region":"Europe","destinationType":"country"},{"id":"dest_finland","slug":"finland","name":"Finland","country":"Finland","emoji":"🇫🇮","region":"Europe","destinationType":"country"},{"id":"dest_france","slug":"france","name":"France","country":"France","emoji":"🇫🇷","region":"Europe","destinationType":"country"},{"id":"dest_georgia","slug":"georgia","name":"Georgia","country":"Georgia","emoji":"🇬🇪","region":"Europe","destinationType":"country"},{"id":"dest_germany","slug":"germany","name":"Germany","country":"Germany","emoji":"🇩🇪","region":"Europe","destinationType":"country"},{"id":"dest_greece","slug":"greece","name":"Greece","country":"Greece","emoji":"🇬🇷","region":"Europe","destinationType":"country"},{"id":"dest_iceland","slug":"iceland","name":"Iceland","country":"Iceland","emoji":"🇮🇸","region":"Europe","destinationType":"country"},{"id":"dest_india","slug":"india","name":"India","country":"India","emoji":"🇮🇳","region":"Asia","destinationType":"country"},{"id":"dest_indonesia","slug":"indonesia","name":"Indonesia","country":"Indonesia","emoji":"🇮🇩","region":"Asia","destinationType":"country"},{"id":"dest_italy","slug":"italy","name":"Italy","country":"Italy","emoji":"🇮🇹","region":"Europe","destinationType":"country"},{"id":"dest_japan","slug":"japan","name":"Japan","country":"Japan","emoji":"🇯🇵","region":"Asia","destinationType":"country"},{"id":"dest_jordan","slug":"jordan","name":"Jordan","country":"Jordan","emoji":"🇯🇴","region":"Middle East","destinationType":"country"},{"id":"dest_kenya","slug":"kenya","name":"Kenya","country":"Kenya","emoji":"🇰🇪","region":"Africa","destinationType":"country"},{"id":"dest_maldives","slug":"maldives","name":"Maldives","country":"Maldives","emoji":"🇲🇻","region":"Asia","destinationType":"country"},{"id":"dest_mexico","slug":"mexico","name":"Mexico","country":"Mexico","emoji":"🇲🇽","region":"Americas","destinationType":"country"},{"id":"dest_montenegro","slug":"montenegro","name":"Montenegro","country":"Montenegro","emoji":"🇲🇪","region":"Europe","destinationType":"country"},{"id":"dest_morocco","slug":"morocco","name":"Morocco","country":"Morocco","emoji":"🇲🇦","region":"Africa","destinationType":"country"},{"id":"dest_nepal","slug":"nepal","name":"Nepal","country":"Nepal","emoji":"🇳🇵","region":"Asia","destinationType":"country"},{"id":"dest_netherlands","slug":"netherlands","name":"Netherlands","country":"Netherlands","emoji":"🇳🇱","region":"Europe","destinationType":"country"},{"id":"dest_new-england","slug":"new-england","name":"New England","country":"United States","emoji":"🇺🇸","region":"Americas","destinationType":"region"},{"id":"dest_new-zealand","slug":"new-zealand","name":"New Zealand","country":"New Zealand","emoji":"🇳🇿","region":"Oceania","destinationType":"country"},{"id":"dest_norway","slug":"norway","name":"Norway","country":"Norway","emoji":"🇳🇴","region":"Europe","destinationType":"country"},{"id":"dest_oman","slug":"oman","name":"Oman","country":"Oman","emoji":"🇴🇲","region":"Middle East","destinationType":"country"},{"id":"dest_peru","slug":"peru","name":"Peru","country":"Peru","emoji":"🇵🇪","region":"Americas","destinationType":"country"},{"id":"dest_philippines","slug":"philippines","name":"Philippines","country":"Philippines","emoji":"🇵🇭","region":"Asia","destinationType":"country"},{"id":"dest_portugal","slug":"portugal","name":"Portugal","country":"Portugal","emoji":"🇵🇹","region":"Europe","destinationType":"country"},{"id":"dest_slovenia","slug":"slovenia","name":"Slovenia","country":"Slovenia","emoji":"🇸🇮","region":"Europe","destinationType":"country"},{"id":"dest_south-africa","slug":"south-africa","name":"South Africa","country":"South Africa","emoji":"🇿🇦","region":"Africa","destinationType":"country"},{"id":"dest_south-korea","slug":"south-korea","name":"South Korea","country":"South Korea","emoji":"🇰🇷","region":"Asia","destinationType":"country"},{"id":"dest_spain","slug":"spain","name":"Spain","country":"Spain","emoji":"🇪🇸","region":"Europe","destinationType":"country"},{"id":"dest_sri-lanka","slug":"sri-lanka","name":"Sri Lanka","country":"Sri Lanka","emoji":"🇱🇰","region":"Asia","destinationType":"country"},{"id":"dest_sweden","slug":"sweden","name":"Sweden","country":"Sweden","emoji":"🇸🇪","region":"Europe","destinationType":"country"},{"id":"dest_switzerland","slug":"switzerland","name":"Switzerland","country":"Switzerland","emoji":"🇨🇭","region":"Europe","destinationType":"country"},{"id":"dest_taiwan","slug":"taiwan","name":"Taiwan","country":"Taiwan","emoji":"🇹🇼","region":"Asia","destinationType":"country"},{"id":"dest_tanzania","slug":"tanzania","name":"Tanzania","country":"Tanzania","emoji":"🇹🇿","region":"Africa","destinationType":"country"},{"id":"dest_thailand","slug":"thailand","name":"Thailand","country":"Thailand","emoji":"🇹🇭","region":"Asia","destinationType":"country"},{"id":"dest_turkey","slug":"turkey","name":"Turkey","country":"Turkey","emoji":"🇹🇷","region":"Europe","destinationType":"country"},{"id":"dest_united-arab-emirates","slug":"united-arab-emirates","name":"United Arab Emirates","country":"United Arab Emirates","emoji":"🇦🇪","region":"Middle East","destinationType":"country"},{"id":"dest_uzbekistan","slug":"uzbekistan","name":"Uzbekistan","country":"Uzbekistan","emoji":"🇺🇿","region":"Asia","destinationType":"country"},{"id":"dest_vietnam","slug":"vietnam","name":"Vietnam","country":"Vietnam","emoji":"🇻🇳","region":"Asia","destinationType":"country"}];
+const RECOMMENDATIONS = [{"id":"rec_thailand_january","destinationId":"dest_thailand","month":"January","monthIndex":1,"description":"Dry, warm, and easy — one of the best times for beaches and island hopping.","tags":["Beach","Nature"],"isFeatured":true,"sortOrder":1},{"id":"rec_mexico_january","destinationId":"dest_mexico","month":"January","monthIndex":1,"description":"Sun, food, and culture — perfect for a warm escape in the middle of winter.","tags":["Beach","Culture"],"isFeatured":true,"sortOrder":2},{"id":"rec_austria_january","destinationId":"dest_austria","month":"January","monthIndex":1,"description":"Reliable snow, charming alpine towns, and peak ski conditions.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":3},{"id":"rec_south-africa_january","destinationId":"dest_south-africa","month":"January","monthIndex":1,"description":"Cape Town in summer means beaches, vineyards, and long sunny days.","tags":["Beach","City"],"isFeatured":true,"sortOrder":4},{"id":"rec_sri-lanka_january","destinationId":"dest_sri-lanka","month":"January","monthIndex":1,"description":"The south coast is calm, sunny, and perfect for a relaxed beach trip.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":5},{"id":"rec_oman_january","destinationId":"dest_oman","month":"January","monthIndex":1,"description":"Warm but comfortable — ideal for deserts, mountains, and coastline.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_philippines_january","destinationId":"dest_philippines","month":"January","monthIndex":1,"description":"Clear water, blue skies, and island hopping at its best.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":7},{"id":"rec_costa-rica_january","destinationId":"dest_costa-rica","month":"January","monthIndex":1,"description":"Dry season kicks in — great for wildlife and outdoor adventures.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":8},{"id":"rec_brazil_february","destinationId":"dest_brazil","month":"February","monthIndex":2,"description":"Summer energy and Carnival create one of the most vibrant travel moments of the year.","tags":["City","Culture"],"isFeatured":true,"sortOrder":1},{"id":"rec_morocco_february","destinationId":"dest_morocco","month":"February","monthIndex":2,"description":"Comfortable temperatures make cities and desert trips much easier.","tags":["Culture","Adventure"],"isFeatured":true,"sortOrder":2},{"id":"rec_canada_february","destinationId":"dest_canada","month":"February","monthIndex":2,"description":"Deep winter landscapes and perfect conditions for snow activities.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":3},{"id":"rec_japan_february","destinationId":"dest_japan","month":"February","monthIndex":2,"description":"Quieter season with early blossoms and fewer crowds.","tags":["Culture","City"],"isFeatured":true,"sortOrder":4},{"id":"rec_jordan_february","destinationId":"dest_jordan","month":"February","monthIndex":2,"description":"Mild weather makes exploring Petra and the desert much more enjoyable.","tags":["Culture","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_colombia_february","destinationId":"dest_colombia","month":"February","monthIndex":2,"description":"Sunny, colorful, and easy to combine cities with the Caribbean coast.","tags":["City","Culture"],"isFeatured":false,"sortOrder":6},{"id":"rec_cambodia_february","destinationId":"dest_cambodia","month":"February","monthIndex":2,"description":"Dry and warm — ideal for temples and slow travel.","tags":["Culture","Nature"],"isFeatured":false,"sortOrder":7},{"id":"rec_maldives_february","destinationId":"dest_maldives","month":"February","monthIndex":2,"description":"Classic postcard conditions: calm seas, sunshine, and pure relaxation.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":8},{"id":"rec_vietnam_march","destinationId":"dest_vietnam","month":"March","monthIndex":3,"description":"A balanced month with generally good conditions from north to south.","tags":["Culture","Nature"],"isFeatured":true,"sortOrder":1},{"id":"rec_spain_march","destinationId":"dest_spain","month":"March","monthIndex":3,"description":"Spring starts to show, with lively cities and fewer tourists.","tags":["City","Culture"],"isFeatured":true,"sortOrder":2},{"id":"rec_new-zealand_march","destinationId":"dest_new-zealand","month":"March","monthIndex":3,"description":"Late summer with great weather for road trips and outdoor travel.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":3},{"id":"rec_united-arab-emirates_march","destinationId":"dest_united-arab-emirates","month":"March","monthIndex":3,"description":"One of the last comfortable months before extreme heat arrives.","tags":["City","Culture"],"isFeatured":true,"sortOrder":4},{"id":"rec_nepal_march","destinationId":"dest_nepal","month":"March","monthIndex":3,"description":"Clear skies and the start of trekking season.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_chile_march","destinationId":"dest_chile","month":"March","monthIndex":3,"description":"Patagonia is still accessible, with fewer crowds than peak months.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_india_march","destinationId":"dest_india","month":"March","monthIndex":3,"description":"A great window for Rajasthan before temperatures rise too much.","tags":["Culture","City"],"isFeatured":false,"sortOrder":7},{"id":"rec_taiwan_march","destinationId":"dest_taiwan","month":"March","monthIndex":3,"description":"Spring blossoms, great food, and a mix of city and nature.","tags":["City","Nature"],"isFeatured":false,"sortOrder":8},{"id":"rec_japan_april","destinationId":"dest_japan","month":"April","monthIndex":4,"description":"Cherry blossom season transforms the country into something special.","tags":["Culture","Nature"],"isFeatured":true,"sortOrder":1},{"id":"rec_netherlands_april","destinationId":"dest_netherlands","month":"April","monthIndex":4,"description":"Tulips bloom everywhere, turning landscapes into color.","tags":["Nature","Culture"],"isFeatured":true,"sortOrder":2},{"id":"rec_italy_april","destinationId":"dest_italy","month":"April","monthIndex":4,"description":"Warm, lively, and still before the summer rush.","tags":["City","Culture"],"isFeatured":true,"sortOrder":3},{"id":"rec_jordan_april","destinationId":"dest_jordan","month":"April","monthIndex":4,"description":"Sunny and comfortable — one of the best times to visit.","tags":["Culture","Adventure"],"isFeatured":true,"sortOrder":4},{"id":"rec_peru_april","destinationId":"dest_peru","month":"April","monthIndex":4,"description":"Rain fades away, making it a smart time to explore early.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_georgia_april","destinationId":"dest_georgia","month":"April","monthIndex":4,"description":"Spring brings green valleys and a relaxed atmosphere.","tags":["Nature","Culture"],"isFeatured":false,"sortOrder":6},{"id":"rec_portugal_april","destinationId":"dest_portugal","month":"April","monthIndex":4,"description":"Fresh, sunny, and still relatively quiet.","tags":["City","Beach"],"isFeatured":false,"sortOrder":7},{"id":"rec_uzbekistan_april","destinationId":"dest_uzbekistan","month":"April","monthIndex":4,"description":"Warm days and clear skies make Silk Road cities shine.","tags":["Culture","City"],"isFeatured":false,"sortOrder":8},{"id":"rec_greece_may","destinationId":"dest_greece","month":"May","monthIndex":5,"description":"Warm and beautiful, without the heavy summer crowds.","tags":["Beach","Culture"],"isFeatured":true,"sortOrder":1},{"id":"rec_france_may","destinationId":"dest_france","month":"May","monthIndex":5,"description":"Longer days, café life, and cities at their most enjoyable.","tags":["City","Culture"],"isFeatured":true,"sortOrder":2},{"id":"rec_bali_may","destinationId":"dest_bali","month":"May","monthIndex":5,"description":"Dry season begins, with lush landscapes still intact.","tags":["Beach","Nature"],"isFeatured":true,"sortOrder":3},{"id":"rec_turkey_may","destinationId":"dest_turkey","month":"May","monthIndex":5,"description":"Great weather for combining coast, cities, and culture.","tags":["Culture","City"],"isFeatured":true,"sortOrder":4},{"id":"rec_croatia_may","destinationId":"dest_croatia","month":"May","monthIndex":5,"description":"Sunny coastline without the peak-season pressure.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":5},{"id":"rec_morocco_may","destinationId":"dest_morocco","month":"May","monthIndex":5,"description":"Still comfortable before summer heat arrives.","tags":["Culture","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_south-korea_may","destinationId":"dest_south-korea","month":"May","monthIndex":5,"description":"Spring flowers and a lively city atmosphere.","tags":["City","Culture"],"isFeatured":false,"sortOrder":7},{"id":"rec_slovenia_may","destinationId":"dest_slovenia","month":"May","monthIndex":5,"description":"Lakes, forests, and mountains all at their best.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":8},{"id":"rec_portugal_june","destinationId":"dest_portugal","month":"June","monthIndex":6,"description":"Lively, sunny, and not as crowded as later in summer.","tags":["City","Beach"],"isFeatured":true,"sortOrder":1},{"id":"rec_croatia_june","destinationId":"dest_croatia","month":"June","monthIndex":6,"description":"Warm sea and stunning coastlines with manageable crowds.","tags":["Beach","Nature"],"isFeatured":true,"sortOrder":2},{"id":"rec_canada_june","destinationId":"dest_canada","month":"June","monthIndex":6,"description":"Start of summer — ideal for cities and outdoor travel.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":3},{"id":"rec_japan_june","destinationId":"dest_japan","month":"June","monthIndex":6,"description":"Greener and quieter, with a slightly more relaxed feel.","tags":["Nature","Culture"],"isFeatured":true,"sortOrder":4},{"id":"rec_norway_june","destinationId":"dest_norway","month":"June","monthIndex":6,"description":"Long days and dramatic landscapes make exploring easier.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_kenya_june","destinationId":"dest_kenya","month":"June","monthIndex":6,"description":"Great early safari conditions with excellent wildlife viewing.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_indonesia_june","destinationId":"dest_indonesia","month":"June","monthIndex":6,"description":"Dry season begins across many islands.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":7},{"id":"rec_switzerland_june","destinationId":"dest_switzerland","month":"June","monthIndex":6,"description":"Early summer hiking with clear lakes and alpine views.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":8},{"id":"rec_bali_july","destinationId":"dest_bali","month":"July","monthIndex":7,"description":"Dry, vibrant, and at its most inviting.","tags":["Beach","Nature"],"isFeatured":true,"sortOrder":1},{"id":"rec_iceland_july","destinationId":"dest_iceland","month":"July","monthIndex":7,"description":"Open roads and endless daylight for exploring wild landscapes.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":2},{"id":"rec_france_july","destinationId":"dest_france","month":"July","monthIndex":7,"description":"Summer atmosphere with long evenings and buzzing cities.","tags":["City","Culture"],"isFeatured":true,"sortOrder":3},{"id":"rec_tanzania_july","destinationId":"dest_tanzania","month":"July","monthIndex":7,"description":"Peak safari season with incredible wildlife sightings.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":4},{"id":"rec_peru_july","destinationId":"dest_peru","month":"July","monthIndex":7,"description":"Dry season makes it ideal for trekking and exploring.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_canada_july","destinationId":"dest_canada","month":"July","monthIndex":7,"description":"Perfect conditions for lakes, mountains, and nature.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_georgia_july","destinationId":"dest_georgia","month":"July","monthIndex":7,"description":"Mountain regions are open and ideal for hiking.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":7},{"id":"rec_sweden_july","destinationId":"dest_sweden","month":"July","monthIndex":7,"description":"Long, bright days and calm natural surroundings.","tags":["Nature","City"],"isFeatured":false,"sortOrder":8},{"id":"rec_italy_august","destinationId":"dest_italy","month":"August","monthIndex":8,"description":"Best enjoyed on the coast, with long warm evenings.","tags":["Beach","Culture"],"isFeatured":true,"sortOrder":1},{"id":"rec_spain_august","destinationId":"dest_spain","month":"August","monthIndex":8,"description":"Beach life, late nights, and peak summer atmosphere.","tags":["Beach","City"],"isFeatured":true,"sortOrder":2},{"id":"rec_switzerland_august","destinationId":"dest_switzerland","month":"August","monthIndex":8,"description":"Alpine hiking at its absolute best.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":3},{"id":"rec_indonesia_august","destinationId":"dest_indonesia","month":"August","monthIndex":8,"description":"Still dry and perfect for island travel.","tags":["Beach","Nature"],"isFeatured":true,"sortOrder":4},{"id":"rec_slovenia_august","destinationId":"dest_slovenia","month":"August","monthIndex":8,"description":"A calmer alternative for lakes and outdoor trips.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_canada_august","destinationId":"dest_canada","month":"August","monthIndex":8,"description":"Peak season for exploring vast landscapes.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_austria_august","destinationId":"dest_austria","month":"August","monthIndex":8,"description":"Beautiful lakes and mountain scenery in summer.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":7},{"id":"rec_montenegro_august","destinationId":"dest_montenegro","month":"August","monthIndex":8,"description":"Coastline beauty with a slightly more relaxed vibe.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":8},{"id":"rec_greece_september","destinationId":"dest_greece","month":"September","monthIndex":9,"description":"Warm water, softer temperatures, and fewer crowds.","tags":["Beach","Culture"],"isFeatured":true,"sortOrder":1},{"id":"rec_portugal_september","destinationId":"dest_portugal","month":"September","monthIndex":9,"description":"One of the best all-round months to visit.","tags":["Beach","City"],"isFeatured":true,"sortOrder":2},{"id":"rec_japan_september","destinationId":"dest_japan","month":"September","monthIndex":9,"description":"A quieter period with a mix of summer and early seasonal change.","tags":["City","Culture"],"isFeatured":true,"sortOrder":3},{"id":"rec_california_september","destinationId":"dest_california","month":"September","monthIndex":9,"description":"Great weather for combining coastlines and road trips.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":4},{"id":"rec_italy_september","destinationId":"dest_italy","month":"September","monthIndex":9,"description":"Harvest season with great food and pleasant weather.","tags":["Culture","City"],"isFeatured":false,"sortOrder":5},{"id":"rec_vietnam_september","destinationId":"dest_vietnam","month":"September","monthIndex":9,"description":"Northern regions improve for nature and trekking.","tags":["Nature","Culture"],"isFeatured":false,"sortOrder":6},{"id":"rec_turkey_september","destinationId":"dest_turkey","month":"September","monthIndex":9,"description":"Warm and calmer after peak summer crowds.","tags":["Beach","Culture"],"isFeatured":false,"sortOrder":7},{"id":"rec_croatia_september","destinationId":"dest_croatia","month":"September","monthIndex":9,"description":"Still warm, but far more relaxed than August.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":8},{"id":"rec_france_october","destinationId":"dest_france","month":"October","monthIndex":10,"description":"Autumn colors and cozy city atmosphere.","tags":["City","Culture"],"isFeatured":true,"sortOrder":1},{"id":"rec_south-korea_october","destinationId":"dest_south-korea","month":"October","monthIndex":10,"description":"Beautiful fall foliage and crisp, clear days.","tags":["Nature","Culture"],"isFeatured":true,"sortOrder":2},{"id":"rec_morocco_october","destinationId":"dest_morocco","month":"October","monthIndex":10,"description":"Comfortable again for cities and desert exploration.","tags":["Culture","Adventure"],"isFeatured":true,"sortOrder":3},{"id":"rec_australia_october","destinationId":"dest_australia","month":"October","monthIndex":10,"description":"Spring brings fresh energy and great conditions.","tags":["Nature","City"],"isFeatured":true,"sortOrder":4},{"id":"rec_nepal_october","destinationId":"dest_nepal","month":"October","monthIndex":10,"description":"Peak trekking season with clear skies.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_georgia_october","destinationId":"dest_georgia","month":"October","monthIndex":10,"description":"Wine harvest and colorful landscapes.","tags":["Culture","Nature"],"isFeatured":false,"sortOrder":6},{"id":"rec_new-england_october","destinationId":"dest_new-england","month":"October","monthIndex":10,"description":"Famous fall foliage and scenic drives.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":7},{"id":"rec_italy_october","destinationId":"dest_italy","month":"October","monthIndex":10,"description":"Slower pace, great food, and pleasant weather.","tags":["Culture","City"],"isFeatured":false,"sortOrder":8},{"id":"rec_thailand_november","destinationId":"dest_thailand","month":"November","monthIndex":11,"description":"Dry season returns, making travel easy and enjoyable again.","tags":["Beach","Nature"],"isFeatured":true,"sortOrder":1},{"id":"rec_argentina_november","destinationId":"dest_argentina","month":"November","monthIndex":11,"description":"Spring brings color and great travel conditions.","tags":["Nature","City"],"isFeatured":true,"sortOrder":2},{"id":"rec_vietnam_november","destinationId":"dest_vietnam","month":"November","monthIndex":11,"description":"A balanced time to explore different regions.","tags":["Culture","Nature"],"isFeatured":true,"sortOrder":3},{"id":"rec_united-arab-emirates_november","destinationId":"dest_united-arab-emirates","month":"November","monthIndex":11,"description":"Outdoor weather becomes ideal again.","tags":["City","Culture"],"isFeatured":true,"sortOrder":4},{"id":"rec_japan_november","destinationId":"dest_japan","month":"November","monthIndex":11,"description":"Autumn colors and a calm, beautiful atmosphere.","tags":["Culture","Nature"],"isFeatured":false,"sortOrder":5},{"id":"rec_oman_november","destinationId":"dest_oman","month":"November","monthIndex":11,"description":"One of the best months to explore comfortably.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":6},{"id":"rec_colombia_november","destinationId":"dest_colombia","month":"November","monthIndex":11,"description":"A vibrant mix of cities, nature, and coastline.","tags":["City","Culture"],"isFeatured":false,"sortOrder":7},{"id":"rec_south-africa_november","destinationId":"dest_south-africa","month":"November","monthIndex":11,"description":"Spring is great for wildlife and outdoor travel.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":8},{"id":"rec_germany_december","destinationId":"dest_germany","month":"December","monthIndex":12,"description":"Christmas markets and festive city atmosphere.","tags":["City","Culture"],"isFeatured":true,"sortOrder":1},{"id":"rec_finland_december","destinationId":"dest_finland","month":"December","monthIndex":12,"description":"Snowy landscapes and northern lights magic.","tags":["Nature","Adventure"],"isFeatured":true,"sortOrder":2},{"id":"rec_mexico_december","destinationId":"dest_mexico","month":"December","monthIndex":12,"description":"Warm, sunny, and perfect for a winter escape.","tags":["Beach","Culture"],"isFeatured":true,"sortOrder":3},{"id":"rec_australia_december","destinationId":"dest_australia","month":"December","monthIndex":12,"description":"Summer starts with beach life and outdoor living.","tags":["Beach","City"],"isFeatured":true,"sortOrder":4},{"id":"rec_switzerland_december","destinationId":"dest_switzerland","month":"December","monthIndex":12,"description":"Ski season begins in scenic alpine villages.","tags":["Nature","Adventure"],"isFeatured":false,"sortOrder":5},{"id":"rec_france_december","destinationId":"dest_france","month":"December","monthIndex":12,"description":"A mix of festive cities and early ski season.","tags":["City","Culture"],"isFeatured":false,"sortOrder":6},{"id":"rec_thailand_december","destinationId":"dest_thailand","month":"December","monthIndex":12,"description":"Beautiful weather and easy travel conditions.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":7},{"id":"rec_philippines_december","destinationId":"dest_philippines","month":"December","monthIndex":12,"description":"Great month for island travel and sunshine.","tags":["Beach","Nature"],"isFeatured":false,"sortOrder":8}];
+
+const destMap = Object.fromEntries(DESTINATIONS.map(d => [d.id, d]));
+
+const MONTHS = [
+  {idx:1,short:'Jan',full:'January'},
+  {idx:2,short:'Feb',full:'February'},
+  {idx:3,short:'Mar',full:'March'},
+  {idx:4,short:'Apr',full:'April'},
+  {idx:5,short:'May',full:'May'},
+  {idx:6,short:'Jun',full:'June'},
+  {idx:7,short:'Jul',full:'July'},
+  {idx:8,short:'Aug',full:'August'},
+  {idx:9,short:'Sep',full:'September'},
+  {idx:10,short:'Oct',full:'October'},
+  {idx:11,short:'Nov',full:'November'},
+  {idx:12,short:'Dec',full:'December'},
+];
+
+const EXPERIENCE_TAGS = ['Beach','City','Culture','Nature','Adventure'];
+
+let selectedMonth = new Date().getMonth() + 1;
+let selectedExp   = null;
+
+// ── SVG placeholder image generation ──────────────────────────
+const PALETTES = {
+  'Asia':        {sky:['#09131E','#152D44'],land:['#0D2A3A','#1A4858'],h:72},
+  'Europe':      {sky:['#0E0818','#1E1030'],land:['#1A0E28','#2A183C'],h:75},
+  'Americas':    {sky:['#081008','#142418'],land:['#0C1E10','#1A3018'],h:68},
+  'Africa':      {sky:['#150804','#2C1408'],land:['#200C04','#3C1808'],h:65},
+  'Middle East': {sky:['#100C04','#22180A'],land:['#1A1206','#2E1E0C'],h:70},
+  'Oceania':     {sky:['#04080E','#0A1C30'],land:['#081424','#102038'],h:73},
+};
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function getSvgImage(destId, region, idx) {
+  const p = PALETTES[region] || PALETTES['Europe'];
+  const h = hash(destId + idx);
+  const hY = p.h + (h % 16) - 8;
+  const gx = 15 + (h >> 3) % 70;
+  const gy = 5 + (h >> 6) % 30;
+  const uid = destId.replace(/[^a-z]/gi,'') + idx;
+
+  let shapes = '';
+
+  if (region === 'Europe' || region === 'Americas') {
+    // Mountain peaks
+    const count = 4 + (h % 4);
+    for (let i = 0; i < count; i++) {
+      const bh = (hash(destId + i * 7)) % 100;
+      const bx = (i * 200 / count) + (bh % 25) - 12;
+      const bw = 28 + (bh % 22);
+      const bh2 = 20 + (bh % 28);
+      shapes += '<polygon points="' + bx + ',' + hY + ' ' + (bx + bw/2) + ',' + (hY - bh2) + ' ' + (bx + bw) + ',' + hY + '" fill="' + p.land[0] + '" opacity="0.85"/>';
+    }
+  } else if (region === 'Asia') {
+    // Layered hills
+    shapes += '<ellipse cx="' + (60 + h % 40) + '" cy="' + (hY + 5) + '" rx="72" ry="24" fill="' + p.land[0] + '" opacity="0.7"/>';
+    shapes += '<ellipse cx="' + (130 + h % 30) + '" cy="' + (hY + 8) + '" rx="58" ry="20" fill="' + p.land[1] + '" opacity="0.6"/>';
+    for (let i = 0; i < 3; i++) {
+      shapes += '<line x1="0" y1="' + (hY + 12 + i*8) + '" x2="200" y2="' + (hY + 12 + i*8) + '" stroke="' + p.sky[1] + '" stroke-width="0.5" opacity="0.25"/>';
+    }
+  } else if (region === 'Oceania') {
+    shapes += '<ellipse cx="100" cy="' + (hY + 6) + '" rx="110" ry="22" fill="' + p.land[0] + '" opacity="0.65"/>';
+    for (let i = 0; i < 4; i++) {
+      shapes += '<line x1="0" y1="' + (hY + 10 + i * 7) + '" x2="200" y2="' + (hY + 10 + i * 7) + '" stroke="' + p.sky[1] + '" stroke-width="0.6" opacity="0.22"/>';
+    }
+  } else if (region === 'Africa') {
+    // Savanna + acacia
+    shapes += '<rect x="0" y="' + (hY - 2) + '" width="200" height="4" fill="' + p.land[0] + '" opacity="0.5"/>';
+    const trees = [20, 55, 95, 135, 168];
+    trees.forEach((tx, i) => {
+      const th2 = 14 + (hash(destId + i) % 16);
+      const tx2 = tx + (hash(destId + 'x' + i) % 12) - 6;
+      shapes += '<rect x="' + (tx2 + 1) + '" y="' + (hY - th2) + '" width="2" height="' + th2 + '" fill="' + p.land[1] + '" rx="1" opacity="0.9"/>';
+      shapes += '<ellipse cx="' + (tx2 + 2) + '" cy="' + (hY - th2) + '" rx="' + (5 + (hash(destId+i*3) % 5)) + '" ry="' + (3 + (hash(destId+i*2) % 3)) + '" fill="' + p.land[0] + '" opacity="0.8"/>';
+    });
+  } else {
+    // Middle East dunes
+    shapes += '<path d="M0,' + hY + ' Q50,' + (hY-18) + ' 100,' + hY + ' Q150,' + (hY-14) + ' 200,' + hY + ' L200,140 L0,140Z" fill="' + p.land[0] + '" opacity="0.75"/>';
+    shapes += '<path d="M0,' + (hY+10) + ' Q70,' + (hY-2) + ' 140,' + (hY+10) + ' Q175,' + (hY+5) + ' 200,' + (hY+8) + ' L200,140 L0,140Z" fill="' + p.land[1] + '" opacity="0.6"/>';
+  }
+
+  const rem = 140 - hY - 2;
+  shapes += '<rect x="0" y="' + (hY + 2) + '" width="200" height="' + rem + '" fill="' + p.land[1] + '" opacity="0.5"/>';
+
+  return '<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" class="card-img-inner">'
+    + '<defs>'
+    + '<radialGradient id="g1_' + uid + '" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="' + p.sky[1] + '"/><stop offset="100%" stop-color="' + p.sky[0] + '"/></radialGradient>'
+    + '<radialGradient id="g2_' + uid + '" cx="' + gx + '%" cy="' + gy + '%" r="45%"><stop offset="0%" stop-color="' + p.land[0] + '" stop-opacity="0.35"/><stop offset="100%" stop-color="' + p.sky[0] + '" stop-opacity="0"/></radialGradient>'
+    + '</defs>'
+    + '<rect width="200" height="140" fill="url(#g1_' + uid + ')"/>'
+    + '<rect width="200" height="140" fill="url(#g2_' + uid + ')"/>'
+    + shapes
+    + '</svg>';
+}
+
+// ── Filter ────────────────────────────────────────────────────
+function getFiltered() {
+  return RECOMMENDATIONS
+    .filter(r => r.monthIndex === selectedMonth)
+    .filter(r => !selectedExp || r.tags.includes(selectedExp))
+    .sort((a, b) => {
+      if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+      return a.sortOrder - b.sortOrder;
+    });
+}
+
+// ── Image helpers ─────────────────────────────────────────────
+
+// Returns the expected real-image path for a destination.
+// Override by adding an `image` field to a destination object later;
+// this function will prefer it over the slug-derived path.
+function getDestinationImage(dest) {
+  return dest.image || 'images/destinations/' + dest.slug + '.jpg';
+}
+
+// Returns a concise, descriptive alt string for screen readers.
+// Override by adding an `imageAlt` field to the destination object later.
+function getDestinationImageAlt(dest) {
+  return dest.imageAlt || dest.name + ', ' + dest.country;
+}
+
+// Renders the media layer for a card.
+// Attempts a real <img> first; if it fails to load, swaps in the SVG placeholder.
+// The SVG placeholder is rendered into a hidden sibling div at the same time,
+// so the fallback is instant (no second layout pass, no flicker).
+function renderCardMedia(dest, idx) {
+  const src = getDestinationImage(dest);
+  const alt = getDestinationImageAlt(dest);
+  const svgFallback = getSvgImage(dest.id, dest.region, idx);
+  const fallbackId = 'fb_' + dest.id.replace(/[^a-z0-9]/gi, '') + '_' + idx;
+
+  // The <img> is attempted first. If it errors, we hide it and reveal the SVG.
+  // Both elements sit in the same wrapper so layout never shifts.
+  return ''
+    + '<img'
+    + ' src="' + src + '"'
+    + ' alt="' + alt + '"'
+    + ' class="card-photo"'
+    + ' loading="lazy"'
+    + ' decoding="async"'
+    + ' onerror="this.style.display=\'none\';document.getElementById(\'' + fallbackId + '\').style.display=\'block\'"'
+    + '/>'
+    + '<div id="' + fallbackId + '" style="display:none;width:100%;height:100%;">'
+    + svgFallback
+    + '</div>';
+}
+
+// ── Card ──────────────────────────────────────────────────────
+function renderCard(rec, idx) {
+  const dest = destMap[rec.destinationId];
+  if (!dest) return '';
+  const media = renderCardMedia(dest, idx);
+  const badge = rec.isFeatured ? '<div class="card-badge">✦ Featured</div>' : '';
+  const tags = rec.tags.slice(0, 2).map(t => '<span class="ctag">' + t + '</span>').join('');
+  const delay = idx * 35;
+  return '<article class="card" role="listitem" aria-label="' + dest.name + ', ' + dest.country + '" style="animation-delay:' + delay + 'ms">'
+    + '<div class="card-img-wrap">' + media + '<div class="card-scrim" aria-hidden="true"></div>' + badge + '</div>'
+    + '<div class="card-body">'
+    + '<h3 class="card-name">' + dest.name + '</h3>'
+    + '<p class="card-country"><span class="card-emoji" aria-hidden="true">' + dest.emoji + '</span>' + dest.country + '</p>'
+    + '<p class="card-desc">' + rec.description + '</p>'
+    + '<div class="card-tags" aria-label="Tags">' + tags + '</div>'
+    + '</div></article>';
+}
+
+// ── Results update ────────────────────────────────────────────
+function updateResults() {
+  const grid = document.getElementById('card-grid');
+  const titleEl = document.getElementById('results-title');
+  const countEl = document.getElementById('results-count');
+  const monthObj = MONTHS.find(m => m.idx === selectedMonth);
+  const monthName = monthObj ? monthObj.full : '';
+  const results = getFiltered();
+
+  if (selectedExp) {
+    titleEl.innerHTML = 'Best <em>' + selectedExp.toLowerCase() + '</em> destinations in <em>' + monthName + '</em>';
+  } else {
+    titleEl.innerHTML = 'Best destinations in <em>' + monthName + '</em>';
+  }
+
+  const n = results.length;
+  countEl.textContent = n > 0 ? n + ' destination' + (n !== 1 ? 's' : '') : '';
+
+  if (results.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon" aria-hidden="true">✦</div><p class="empty-msg">No destinations match this combination yet.</p><p class="empty-sub">Try a different month or remove the experience filter.</p></div>';
+  } else {
+    grid.innerHTML = results.map((r, i) => renderCard(r, i)).join('');
+  }
+}
+
+// ── Month grid ────────────────────────────────────────────────
+function buildMonthGrid() {
+  const grid = document.getElementById('month-grid');
+  grid.innerHTML = MONTHS.map(m =>
+    '<button class="pill' + (m.idx === selectedMonth ? ' m-active' : '') + '" data-month="' + m.idx + '" aria-pressed="' + (m.idx === selectedMonth) + '" aria-label="' + m.full + '">' + m.short + '</button>'
+  ).join('');
+  grid.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedMonth = +btn.dataset.month;
+      grid.querySelectorAll('.pill').forEach(b => {
+        const on = +b.dataset.month === selectedMonth;
+        b.classList.toggle('m-active', on);
+        b.setAttribute('aria-pressed', on);
+      });
+      updateResults();
+    });
+  });
+}
+
+// ── Exp grid ──────────────────────────────────────────────────
+function buildExpGrid() {
+  const grid = document.getElementById('exp-grid');
+  grid.innerHTML = EXPERIENCE_TAGS.map(tag =>
+    '<button class="pill" data-exp="' + tag + '" aria-pressed="false" aria-label="Filter by ' + tag + '">' + tag + '</button>'
+  ).join('');
+  grid.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.dataset.exp;
+      if (selectedExp === tag) {
+        selectedExp = null;
+        btn.classList.remove('e-active');
+        btn.setAttribute('aria-pressed', false);
+      } else {
+        selectedExp = tag;
+        grid.querySelectorAll('.pill').forEach(b => {
+          const on = b.dataset.exp === tag;
+          b.classList.toggle('e-active', on);
+          b.setAttribute('aria-pressed', on);
+        });
+      }
+      updateResults();
+    });
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildMonthGrid();
+  buildExpGrid();
+  updateResults();
+});
+</script>
+</body>
+</html>
