@@ -11,16 +11,18 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:        #0C0B09;
-  --bg-card:   #141310;
-  --text-pri:  #EDE8DE;  /* 16.1x on bg — hero, card names, titles        */
-  --text-sec:  #9A9A94;  /*  6.6x on bg — descriptions, sub-text, labels  */
-  --text-dim:  #808079;  /*  4.7x on card — tags, country, pill, footer   */
+  --bg:        #171512;  /* warm dark stone — off true-black                 */
+  --bg-card:   #201E1A;  /* clearly lifted above page bg                    */
+  --bg-raised: #272420;  /* card hover surface                               */
+  --text-pri:  #EDE8DE;  /* 14.9x on bg — hero, card names, titles          */
+  --text-sec:  #9A9A94;  /*  6.4x on bg — descriptions, sub-text            */
+  --text-dim:  #86867F;  /*  4.5x on card — tags, country, pill, footer     */
   --accent:    #3A7B78;
   --accent-h:  #52A8A5;
   --warm:      #C8943A;
-  --border:    #242420;
-  --border-l:  #1C1C18;
+  --warm-dim:  #8A6020;  /* warm accent subdued — hero glow, tint           */
+  --border:    #2E2C28;
+  --border-l:  #252320;
 }
 html{scroll-behavior:smooth;}
 body{
@@ -39,10 +41,13 @@ body::before{
   content:'';
   position:fixed;inset:0;
   pointer-events:none;z-index:900;
-  opacity:0.025;
+  opacity:0.032;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:200px 200px;
 }
+
+/* Hero atmosphere — subtle radial warmth */
+.hero{padding:80px 0 0;}
 
 .page{max-width:1240px;margin:0 auto;padding:0 52px;}
 @media(max-width:800px){.page{padding:0 28px;}}
@@ -54,14 +59,13 @@ body::before{
 .logo-when{color:var(--accent);}
 .header-domain{font-size:11px;letter-spacing:0.12em;color:var(--text-dim);text-transform:uppercase;}
 
-/* Hero */
-.hero{padding:80px 0 0;}
+/* Hero typography */
 .hero-eyebrow{
   font-size:10px;letter-spacing:0.22em;color:var(--accent);
-  text-transform:uppercase;font-weight:400;margin-bottom:26px;
+  text-transform:uppercase;font-weight:500;margin-bottom:26px;
   display:flex;align-items:center;gap:12px;
 }
-.hero-eyebrow::before{content:'';display:block;width:28px;height:0.5px;background:var(--accent);opacity:0.5;}
+.hero-eyebrow::before{content:'';display:block;width:28px;height:0.5px;background:var(--accent);opacity:0.6;}
 .hero-h1{
   font-family:'Cormorant Garamond',Georgia,serif;
   font-size:clamp(40px,5.5vw,72px);
@@ -123,29 +127,51 @@ body::before{
 
 /* Card */
 .card{
-  border-radius:10px;overflow:hidden;
+  border-radius:11px;overflow:hidden;
   background:var(--bg-card);
-  border:0.5px solid var(--border-l);
+  border:1px solid var(--border-l);
   cursor:default;
   transition:transform .26s cubic-bezier(.25,.46,.45,.94),
              box-shadow .26s cubic-bezier(.25,.46,.45,.94),
-             border-color .26s;
+             border-color .26s,
+             background .26s;
   animation:cardIn .3s cubic-bezier(.25,.46,.45,.94) both;
 }
-.card:hover{transform:translateY(-3px);box-shadow:0 18px 44px rgba(0,0,0,.5);border-color:var(--border);}
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 20px 48px rgba(0,0,0,.42);
+  border-color:var(--border);
+  background:var(--bg-raised);
+}
 .card:hover .card-img-inner,
 .card:hover .card-photo{transform:scale(1.055);}
-@keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* Region tint stripe — top edge of each card */
+.card::before{
+  content:'';display:block;height:2px;
+  position:absolute;top:0;left:0;right:0;
+  opacity:0;transition:opacity .26s;
+  z-index:2;
+}
+.card:hover::before{opacity:1;}
+.card[data-region="Europe"]::before{background:linear-gradient(90deg,rgba(80,60,140,.7),transparent);}
+.card[data-region="Asia"]::before{background:linear-gradient(90deg,rgba(30,90,80,.9),transparent);}
+.card[data-region="Americas"]::before{background:linear-gradient(90deg,rgba(40,110,60,.7),transparent);}
+.card[data-region="Africa"]::before{background:linear-gradient(90deg,rgba(160,80,20,.8),transparent);}
+.card[data-region="Middle East"]::before{background:linear-gradient(90deg,rgba(140,100,20,.8),transparent);}
+.card[data-region="Oceania"]::before{background:linear-gradient(90deg,rgba(20,80,130,.8),transparent);}
 
 .card-img-wrap{height:200px;overflow:hidden;position:relative;}
 .card-img-inner{width:100%;height:100%;display:block;transition:transform .42s cubic-bezier(.25,.46,.45,.94);}
 .card-photo{width:100%;height:100%;display:block;object-fit:cover;transition:transform .42s cubic-bezier(.25,.46,.45,.94);}
-.card-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,11,9,0) 15%,rgba(12,11,9,.92) 100%);pointer-events:none;}
+.card-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,21,18,0) 20%,rgba(23,21,18,.78) 100%);pointer-events:none;}
 .card-badge{
-  position:absolute;top:10px;left:10px;
-  font-size:8.5px;font-weight:500;letter-spacing:0.13em;text-transform:uppercase;
-  color:var(--accent-h);background:rgba(6,16,14,.85);
-  border:0.5px solid rgba(58,123,120,.25);padding:3px 9px;border-radius:100px;
+  position:absolute;top:11px;left:11px;
+  font-size:8.5px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent-h);background:rgba(8,20,18,.88);
+  border:0.5px solid rgba(58,123,120,.3);padding:3.5px 10px;border-radius:100px;
+  backdrop-filter:blur(6px);
 }
 
 .card-body{padding:18px 20px 22px;}
@@ -403,7 +429,7 @@ function renderCard(rec, idx) {
   const badge = rec.isFeatured ? '<div class="card-badge">✦ Featured</div>' : '';
   const tags = rec.tags.slice(0, 2).map(t => '<span class="ctag">' + t + '</span>').join('');
   const delay = idx * 35;
-  return '<article class="card" role="listitem" aria-label="' + dest.name + ', ' + dest.country + '" style="animation-delay:' + delay + 'ms">'
+  return '<article class="card" role="listitem" aria-label="' + dest.name + ', ' + dest.country + '" data-region="' + dest.region + '" style="animation-delay:' + delay + 'ms;position:relative;">'
     + '<div class="card-img-wrap">' + media + '<div class="card-scrim" aria-hidden="true"></div>' + badge + '</div>'
     + '<div class="card-body">'
     + '<h3 class="card-name">' + dest.name + '</h3>'
